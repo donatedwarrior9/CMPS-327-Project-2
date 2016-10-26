@@ -15,6 +15,7 @@ public class pcscript : MonoBehaviour {
     [Range(.1f, 30f)]
     public float speed;
     playerstate state;
+    bool paused;
     List<node> neighbors;
     List<node> discovered;
     List<node> visited;
@@ -122,36 +123,27 @@ public class pcscript : MonoBehaviour {
         if (path != null)
         {
             targetWaypoint = new Vector3(path[currpoint].x, 1, path[currpoint].y);
-            state = playerstate.move;
+            paused = false;
+            state = playerstate.idle;
         }
         else
-            state = playerstate.idle;
-            
+        {
+            paused = true;
+            state = playerstate.move;
+        }
     }
 
     // Update is called once per frame
     void Update() {
-
-        switch (state)
+        if (Input.GetKeyDown(KeyCode.Space))
         {
-            case playerstate.move:
-                if (path != null)
-                {
-                    if (currpoint < path.Count)
-                    {
-                        Move(targetWaypoint);
-                        if (this.transform.position == targetWaypoint)
-                        {
-                            currpoint++;
-                            if (currpoint < path.Count)
-                                targetWaypoint = new Vector3(path[currpoint].x, 1, path[currpoint].y);
-                        }
-                    }
-                }
-                break;
-            case playerstate.idle:
-                break;
+            paused = !paused;
         }
+        if (paused)
+            state = playerstate.idle;
+        else
+            state = playerstate.move;
+        doStates();
     }
     void aStar(node start, node finish) {
         neighbors = new List<node>();
@@ -287,5 +279,56 @@ public class pcscript : MonoBehaviour {
     void Move(Vector3 target)
     {
         this.transform.position = Vector3.MoveTowards(transform.position, target, speed * Time.deltaTime);
+    }
+    void doStartStuff()
+    {
+        map = GameObject.FindObjectOfType<MapExample>().tiles4;
+        node finish = null;
+        node start = null;
+        foreach (MapTile a in map)
+        {
+            if (a.IsGoal)
+            {
+                finish = new node(a.X, a.Y);
+                Debug.Log("found finish at " + a.X + ", " + a.Y);
+            }
+
+            else if (a.IsStart)
+            {
+                start = new node(a.X, a.Y);
+            }
+        }
+        aStar(start, finish);
+
+        if (path != null)
+        {
+            targetWaypoint = new Vector3(path[currpoint].x, 1, path[currpoint].y);
+            state = playerstate.move;
+        }
+        else
+            state = playerstate.idle;
+    }
+    void doStates()
+    {
+        switch (state)
+        {
+            case playerstate.move:
+                if (path != null)
+                {
+                    if (currpoint < path.Count)
+                    {
+                        Move(targetWaypoint);
+                        if (this.transform.position == targetWaypoint)
+                        {
+                            currpoint++;
+                            if (currpoint < path.Count)
+                                targetWaypoint = new Vector3(path[currpoint].x, 1, path[currpoint].y);
+                        }
+                    }
+                }
+                break;
+            case playerstate.idle:
+                break;
+        }
     }
 }

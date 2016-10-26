@@ -20,26 +20,49 @@ public class MapExample : MonoBehaviour
 
     void Awake()
     {
-        PrimGenerator primGen = new PrimGenerator();
+        createN();
+    }
 
-        // generate a map of size 20x20 with no extra walls removed
-        //MapTile[,] tiles1 = primGen.MapGen(20, 20, 0.0f);
-
-        // generate a map of size 30x30 with half of the walls removed after generation
-        //tiles4 = primGen.MapGen(100, 100, 0.5f);
-
-        PerlinGenerator perlinGen = new PerlinGenerator();
-
-        // generates a map of size 20x20 with a large constraint (generates a tightly-packed map)
-        //MapTile[,] tiles3 = perlinGen.MapGen(20, 20, 5.0f);
-
-        // generates a map of size 100x100 with a medium constraint (generates a more open map)
-        tiles4 = perlinGen.MapGen(50, 50, 7.5f);
+    void Start ()
+    {
         
+    }
 
-        // generates a map of size 20x20 with a small constraint (generates a very open map)
-        //MapTile[,] tiles5 = perlinGen.MapGen(20, 20, 20.0f);
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.N))
+        {
+            destroy();
+            createN();
+        }
 
+        if (Input.GetKeyDown(KeyCode.M))
+        {
+            destroy();
+            createM();
+        }
+    }
+
+    void destroy()
+    {
+        GameObject[] mapGen = GameObject.FindGameObjectsWithTag("pc");
+        GameObject[] players = GameObject.FindGameObjectsWithTag("map");
+        foreach(GameObject g in mapGen)
+        {
+            Destroy(g);
+        }
+        foreach(GameObject g in players)
+        {
+            Destroy(g);
+        }
+    }
+
+    void createN()
+    {
+        PerlinGenerator perlinGen = new PerlinGenerator();
+        // generates a map of size 100x100 with a medium constraint (generates a more open map)
+        tiles4 = perlinGen.MapGen(75, 75, 7.5f);
+        
         foreach (MapTile a in tiles4)
         {
             if (a.IsGoal)
@@ -65,8 +88,34 @@ public class MapExample : MonoBehaviour
         }
     }
 
-    void Start ()
+    void createM()
     {
-        
+        PrimGenerator primGen = new PrimGenerator();
+        // generate a map of size 20x20 with no extra walls removed
+        tiles4 = primGen.MapGen(75, 75, 0.05f);
+
+        foreach (MapTile a in tiles4)
+        {
+            if (a.IsGoal)
+            {
+                Instantiate(goalPlane, new Vector3(a.X, 0, a.Y), Quaternion.identity);
+            }
+
+            else if (a.IsStart)
+            {
+                Instantiate(startPlane, new Vector3(a.X, 0, a.Y), Quaternion.identity);
+                Instantiate(pc, new Vector3(a.X, .5f, a.Y), Quaternion.identity);
+            }
+
+            else if (a.Walkable)
+            {
+                Instantiate(walkable, new Vector3(a.X, 0, a.Y), Quaternion.identity);
+            }
+
+            else
+            {
+                Instantiate(notWalkable, new Vector3(a.X, 1, a.Y), Quaternion.identity);
+            }
+        }
     }
 }
