@@ -145,6 +145,8 @@ public class pcscript : MonoBehaviour {
             state = playerstate.move;
         doStates();
     }
+
+
     void aStar(node start, node finish) {
         neighbors = new List<node>();
         discovered = new List<node>();
