@@ -1,26 +1,17 @@
 ﻿using UnityEngine;
 using System.Collections;
-using MapGen;
 using System.Collections.Generic;
-public enum playerstate {move, idle}
+using MapGen;
+public enum enemystate {move, chase }
 
-public class pcscript : MonoBehaviour {
-
-    public MapTile[,] map;
-    public GameObject MyPrefab;
+public class enemy1script : MonoBehaviour {
+    public Vector3 target;
     public GameObject MyPrefab2;
-    public AudioSource audio;
-    int currpoint = 0;
-    Vector3 targetWaypoint;
-    [Range(.1f, 30f)]
-    public float speed;
-    playerstate state;
-    bool paused;
     List<node> path;
-    List<KeyValuePair<playerstate, playerstate>> pairs = new List<KeyValuePair<playerstate, playerstate>>
-    { };
+    public MapTile[,] map;
 
-    public class node {
+    public class node
+    {
         public int x;
         public int y;
         public int f;
@@ -28,7 +19,8 @@ public class pcscript : MonoBehaviour {
         public int h;
         public node parent;
 
-        public node() {
+        public node()
+        {
             this.x = 0;
             this.y = 0;
             this.f = 0;
@@ -37,7 +29,8 @@ public class pcscript : MonoBehaviour {
             this.parent = null;
         }
 
-        public node(int a, int b) {
+        public node(int a, int b)
+        {
             this.x = a;
             this.y = b;
             this.g = 0;
@@ -46,7 +39,8 @@ public class pcscript : MonoBehaviour {
             this.parent = null;
         }
 
-        public node(int a, int b, node start, node finish) {
+        public node(int a, int b, node start, node finish)
+        {
             this.x = a;
             this.y = b;
             this.g = 0;
@@ -66,7 +60,7 @@ public class pcscript : MonoBehaviour {
 
         public static bool operator ==(node n1, node n2)
         {
-            return (n1.x == n2.x && n1.y == n2.y); 
+            return (n1.x == n2.x && n1.y == n2.y);
         }
 
         public static bool operator !=(node n1, node n2)
@@ -97,25 +91,17 @@ public class pcscript : MonoBehaviour {
         }
     }
     // Use this for initialization
-    void Start()
+    void Start () {
+        
+    }
+	
+	// Update is called once per frame
+	void Update () {
+        
+	}
+   
+    List<node> aStar(node start, node finish)
     {
-        doStartStuff(); 
-    }
-
-    // Update is called once per frame
-    void Update() {
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            paused = !paused;
-        }
-        if (paused)
-            state = playerstate.idle;
-        else
-            state = playerstate.move;
-        doStates();
-    }
-
-    List<node> aStar(node start, node finish) {
         List<node> neighbors = new List<node>();
         List<node> discovered = new List<node>();
         List<node> visited = new List<node>();
@@ -123,7 +109,8 @@ public class pcscript : MonoBehaviour {
         node current = null;
         float posy = 4;
         discovered.Add(start);
-        while (discovered.Count > 0) {
+        while (discovered.Count > 0)
+        {
             int minDist = 10000;
             foreach (node n in discovered)
             {
@@ -141,7 +128,7 @@ public class pcscript : MonoBehaviour {
                 Debug.Log("all done");
                 break;
             }
-           
+
             if (current.y - 1 >= 0)
             {
                 if (map[current.x, (current.y - 1)].Walkable)
@@ -150,7 +137,7 @@ public class pcscript : MonoBehaviour {
                     if (discovered.Contains(n))
                     {
                         neighbors.Add(discovered.Find(x => x == n));
-                    }    
+                    }
                     else
                     {
                         neighbors.Add(new node((current.x), (current.y - 1), start, finish, current));
@@ -204,9 +191,10 @@ public class pcscript : MonoBehaviour {
                 }
             }
 
-            foreach(node n in neighbors)
+            foreach (node n in neighbors)
             {
-                if (visited.Contains(n)) {
+                if (visited.Contains(n))
+                {
                     continue;
                 }
                 if (n.g > (current.g + 1) || !discovered.Contains(n))
@@ -224,7 +212,6 @@ public class pcscript : MonoBehaviour {
         if (current != finish)
         {
             //Debug.Log("couldnt find path");
-            audio.Play();
             walkPath = null;
             return walkPath;
         }
@@ -238,75 +225,24 @@ public class pcscript : MonoBehaviour {
                 Vector3 pos = new Vector3(current.x, 2, current.y);
                 Instantiate(MyPrefab2, pos, Quaternion.identity);
                 current = current.parent;
-                
+
             }
             walkPath.Reverse();
             return walkPath;
-            
+
         }
-       
+
     }
 
-    void Move(Vector3 target)
-    {
-        this.transform.position = Vector3.MoveTowards(transform.position, target, speed * Time.deltaTime);
-    }
-
-    void doStartStuff()
+    void dostartstuff()
     {
         map = GameObject.FindObjectOfType<MapExample>().tiles4;
-        node finish = null;
-        node start = null;
-        foreach (MapTile a in map)
-        {
-            if (a.IsGoal)
-            {
-                finish = new node(a.X, a.Y);
-                Debug.Log("found finish at " + a.X + ", " + a.Y);
-            }
-
-            else if (a.IsStart)
-            {
-                start = new node(a.X, a.Y);
-            }
-        }
-        path = aStar(start, finish);
-
-        if (path != null)
-        {
-            targetWaypoint = new Vector3(path[currpoint].x, 1, path[currpoint].y);
-            paused = false;
-            state = playerstate.idle;
-        }
-        else
-        {
-            paused = true;
-            state = playerstate.move;
-        }
+        GetATarget();
     }
 
-    void doStates()
+    void GetATarget()
     {
-        switch (state)
-        {
-            case playerstate.move:
-                if (path != null)
-                {
-                    if (currpoint < path.Count)
-                    {
-                        Move(targetWaypoint);
-                        if (this.transform.position == targetWaypoint)
-                        {
-                            currpoint++;
-                            if (currpoint < path.Count)
-                                targetWaypoint = new Vector3(path[currpoint].x, 1, path[currpoint].y);
-                        }
-                    }
-                }
-                break;
-            case playerstate.idle:
-                break;
-                
-        }
+        target = GameObject.FindObjectOfType<pcscript>().transform.position;
     }
+
 }

@@ -2,7 +2,8 @@
 using System.Collections;
 
 public class flicker : MonoBehaviour {
-
+    public float intense;
+    public float fidelity;
 	// Use this for initialization
 	void Start () {
 	
@@ -11,13 +12,13 @@ public class flicker : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
-        if (this.GetComponent<Light>().intensity < .5f)
+        if (this.GetComponent<Light>().intensity < intense)
         {
-            this.GetComponent<Light>().intensity += (Random.value * .10f); //turn it off
+            this.GetComponent<Light>().intensity += (Random.value * fidelity); //turn it off
         }
         else
         {
-            this.GetComponent<Light>().intensity -= (Random.value * .10f); //turn it on
+            this.GetComponent<Light>().intensity -= (Random.value * fidelity); //turn it on
         }
     }
 }

@@ -17,6 +17,8 @@ public class MapExample : MonoBehaviour
 
     public GameObject pc;
 
+    public GameObject enemy1;
+
 
     void Awake()
     {
@@ -86,6 +88,18 @@ public class MapExample : MonoBehaviour
                 Instantiate(notWalkable, new Vector3(a.X, 1, a.Y), Quaternion.identity);
             }
         }
+        foreach (MapTile a in tiles4)
+        {
+            if (a.Walkable)
+            {
+                int chance = Mathf.RoundToInt(Random.Range(.5f, 500.5f));
+                if (chance == 1)
+                {
+                    Instantiate(enemy1, new Vector3(a.X, .5f, a.Y), Quaternion.identity);
+                }
+                
+            }
+        }
     }
 
     void createM()
@@ -115,6 +129,18 @@ public class MapExample : MonoBehaviour
             else
             {
                 Instantiate(notWalkable, new Vector3(a.X, 1, a.Y), Quaternion.identity);
+            }
+        }
+        foreach (MapTile a in tiles4)
+        {
+            if (a.Walkable)
+            {
+                int chance = Mathf.RoundToInt(Random.Range(.5f, 500.5f));
+                if (chance == 1)
+                {
+                    Instantiate(enemy1, new Vector3(a.X, .5f, a.Y), Quaternion.identity);
+                }
+
             }
         }
     }

@@ -46,7 +46,7 @@
   </ItemGroup>
   <ItemGroup>
      <Compile Include="Assets\scripts\MapExample.cs" />
-     <Compile Include="Assets\scripts\NewBehaviourScript.cs" />
+     <Compile Include="Assets\scripts\enemy1script.cs" />
      <Compile Include="Assets\scripts\flicker.cs" />
      <Compile Include="Assets\scripts\pcscript.cs" />
  <Reference Include="UnityEngine.UI">
